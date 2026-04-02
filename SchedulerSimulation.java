@@ -1,5 +1,7 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
@@ -34,15 +36,26 @@ class Process implements Runnable {
       // feature 1 : Add priority field ( integr 1-5,where 5 is highest)
         private int priority;
 
+     // feature 3 : fields to track waiting time 
+        private long creationTime;
+        private long totalWaitingTime;
+        private long lastReadyTime;
+
     // Constructor to initialize the process with name, burst time, and time quantum
     // feature 1 : added priority parameter to constructor
-    public Process(String name, int burstTime, int timeQuantum) {
+    // feature 3 : initialize time fields
+    public Process(String name, int burstTime, int timeQuantum, int priority) {
         this.name = name;
         this.burstTime = burstTime;
         this.timeQuantum = timeQuantum;
         this.remainingTime = burstTime; // Initially, remaining time is equal to the burst time
-        this.priority=priority; //  featur 1 : initialize priority 
-      
+        this.priority=priority;
+        
+        //  feature 1 : initialize timing fields 
+        this.creationTime = System.currentTimeMillis();
+        this.totalWaitingTime = 0;
+        this.lastReadyTime = this.creationTime;
+
     }
 
     // This method will be called when the thread for this process is started
@@ -148,7 +161,33 @@ class Process implements Runnable {
         return priority;
     }
 
+    // FEATURE 3: Method to set last ready time when process re-enters queue
+public void setLastReadyTime(long time) {
+    this.lastReadyTime = time;
+}
 
+    // feature 3 : Method to update waiting time when process is about to run
+    // Called when process starts executing to calculate how long it waited
+    public void updateWaitingTime() {
+        long currentTime = System.currentTimeMillis();
+        long waitTime = currentTime - lastReadyTime; // Time spent waiting since last added to queue
+        totalWaitingTime += waitTime;
+    }
+
+    // feature 3 : Getter for last ready time
+    public long getLastReadyTime() {
+        return lastReadyTime;
+    }
+
+    // feature 3 : Getter for total waiting time
+    public long getTotalWaitingTime() {
+        return totalWaitingTime;
+    }
+
+    // feature 3 : Getter for creation time
+    public long getCreationTime() {
+        return creationTime;
+    }
 
     // Check if the process has finished (i.e., no remaining time)
     public boolean isFinished() {
@@ -159,7 +198,7 @@ class Process implements Runnable {
 public class SchedulerSimulation {
     // feature 2 :static counter for context switches
     private static int contextSwitches = 0;
-
+    private static List<Process> completedProcesses = new ArrayList<>();
 
     public static void main(String[] args) {
         // ⚠️ IMPORTANT: Put your student ID here to seed the random number generator
@@ -244,22 +283,30 @@ public class SchedulerSimulation {
 
             //feature 2 : increment context switch counter when a new process starts running 
             contextSwitches++;
-            
+
+            //retrieve the process associated with the thread from the map
+            Process process = processMap.get(currentThread);
+
+            // feature 3 : update waiting time for this process before it starts running
+            // This calculates how long the process has been waiting since it was last added to the queue
+            process.updateWaitingTime();
+                        
             // Print the current process queue (list of process IDs in the queue)
             System.out.println(Colors.BOLD + Colors.MAGENTA + "┌─ Ready Queue " + "─".repeat(65) + Colors.RESET);
             System.out.print(Colors.MAGENTA + "│ " + Colors.RESET + Colors.BRIGHT_WHITE + "[" + Colors.RESET);
             int queueCount = 0;
+
             for (Thread thread : processQueue) {
-                Process process = processMap.get(thread);
-                if (queueCount > 0) System.out.print(Colors.WHITE + " → " + Colors.RESET);
-                System.out.print(Colors.BRIGHT_CYAN + process.getName() + Colors.RESET);
-                queueCount++;
-            }
+             Process p = processMap.get(thread);
+             if (queueCount > 0) System.out.print(Colors.WHITE + " → " + Colors.RESET);
+               System.out.print(Colors.BRIGHT_CYAN + p.getName() + Colors.RESET);
+              queueCount++;
+}
             if (queueCount == 0) {
                 System.out.print(Colors.YELLOW + "empty" + Colors.RESET);
             }
-            System.out.println(Colors.BRIGHT_WHITE + "]" + Colors.RESET);
-            System.out.println(Colors.BOLD + Colors.MAGENTA + "└" + "─".repeat(79) + Colors.RESET + "\n");
+           System.out.println(Colors.BRIGHT_WHITE + "]" + Colors.RESET);
+           System.out.println(Colors.BOLD + Colors.MAGENTA + "└" + "─".repeat(79) + Colors.RESET + "\n");
             
             // Start the thread, which will run the process for one time quantum
             currentThread.start();
@@ -271,24 +318,33 @@ public class SchedulerSimulation {
                 System.out.println("Main thread interrupted.");
             }
             
-            // Retrieve the process associated with the thread from the map
-            Process process = processMap.get(currentThread);
             
             // Check if the process is not finished
             if (!process.isFinished()) {
                 // If the process still has remaining time, check if there are more processes in queue
                 if (!processQueue.isEmpty()) {
+                    // FEATURE 3: Set last ready time when re-entering queue
+                    process.setLastReadyTime(System.currentTimeMillis());
+
                     // Re-enqueue the process to give it another chance to run in the next round
                     addProcessToQueue(process, processQueue, processMap);
+
                 } else {
                     // If this is the last process in the queue, run it to completion
-                    System.out.println(Colors.BRIGHT_YELLOW + "  ⚠ " + Colors.CYAN + process.getName() + 
-                                      Colors.RESET + Colors.YELLOW + " is the last process → running to completion" + 
-                                      Colors.RESET);
-                    process.runToCompletion(); // Run until the process completes
+                    System.out.println(Colors.BRIGHT_YELLOW + "  ⚠ " + Colors.CYAN + process.getName() +
+                                    Colors.RESET + Colors.YELLOW + " is the last process → running to completion" +
+                                    Colors.RESET);
+                    process.runToCompletion();
+
+                    // FEATURE 3: Add to completed list
+                    completedProcesses.add(process);
                 }
-            }
-        }
+            } else {
+                // FEATURE 3: Process finished normally, add to completed list
+                completedProcesses.add(process);
+           }
+                        
+                 }
         
         // End of the scheduler simulation
         System.out.println(Colors.BOLD + Colors.BRIGHT_GREEN + 
@@ -306,25 +362,27 @@ public class SchedulerSimulation {
         "╔══════════════════════════════════════════════════════════════╗" +
         Colors.RESET);
 
-System.out.println(Colors.BOLD + Colors.BRIGHT_WHITE +
-        Colors.BG_BLUE + Colors.BOLD + "            SCHEDULER STATISTICS            " +
-        Colors.RESET);
+        System.out.println(Colors.BOLD + Colors.BRIGHT_WHITE +
+                Colors.BG_BLUE + Colors.BOLD + "            SCHEDULER STATISTICS            " +
+                Colors.RESET);
 
-System.out.println(Colors.BOLD + Colors.BRIGHT_YELLOW +
-        "╠══════════════════════════════════════════════════════════════╣" +
-        Colors.RESET);
+        System.out.println(Colors.BOLD + Colors.BRIGHT_YELLOW +
+                "╠══════════════════════════════════════════════════════════════╣" +
+                Colors.RESET);
 
-System.out.println(Colors.BOLD + Colors.BRIGHT_YELLOW +
-        Colors.CYAN + "  🔄 Total context switches: " + Colors.RESET +
-        Colors.BRIGHT_CYAN + String.format("%-52s", contextSwitches) +
-        Colors.RESET);
+        System.out.println(Colors.BOLD + Colors.BRIGHT_YELLOW +
+                Colors.CYAN + "  🔄 Total context switches: " + Colors.RESET +
+                Colors.BRIGHT_CYAN + String.format("%-52s", contextSwitches) +
+                Colors.RESET);
 
-System.out.println(Colors.BOLD + Colors.BRIGHT_YELLOW +
-        "╚══════════════════════════════════════════════════════════════╝" +
-        Colors.RESET + "\n");
-    
+        System.out.println(Colors.BOLD + Colors.BRIGHT_YELLOW +
+                "╚══════════════════════════════════════════════════════════════╝" +
+                Colors.RESET + "\n");
+                displayWaitingTimeSummary();
+                
+            
 
-    }
+            }
 
     // Method to add a process to the queue and map, while printing a "ready" message
     // feature 1 : updated to include priority in the message
@@ -346,4 +404,68 @@ System.out.println(Colors.BOLD + Colors.BRIGHT_YELLOW +
                           " │ Burst time: " + Colors.YELLOW + process.getBurstTime() + "ms" + 
                           Colors.RESET);
     }
+    public static void displayWaitingTimeSummary() {
+    System.out.println(Colors.BOLD + Colors.BRIGHT_CYAN +
+            "╔════════════════════════════════════════════════════════════════════════════════╗" +
+            Colors.RESET);
+
+    System.out.println(Colors.BOLD + Colors.BRIGHT_CYAN + "║" + Colors.RESET +
+            Colors.BG_BLUE + Colors.BRIGHT_WHITE + Colors.BOLD +
+            "                     PROCESS WAITING TIME SUMMARY                            " +
+            Colors.RESET + Colors.BOLD + Colors.BRIGHT_CYAN + "║" + Colors.RESET);
+
+    System.out.println(Colors.BOLD + Colors.BRIGHT_CYAN +
+            "╠════════════════════════════════════════════════════════════════════════════════╣" +
+            Colors.RESET);
+
+    System.out.println(Colors.BOLD + Colors.BRIGHT_CYAN + "║" + Colors.RESET +
+            "  " + Colors.BOLD + Colors.BRIGHT_WHITE +
+            String.format("%-12s", "Process") +
+            String.format("%-15s", "Burst Time") +
+            String.format("%-15s", "Priority") +
+            String.format("%-20s", "Waiting Time") +
+            Colors.RESET + "      " +
+            Colors.BOLD + Colors.BRIGHT_CYAN + "║" + Colors.RESET);
+
+    System.out.println(Colors.BOLD + Colors.BRIGHT_CYAN +
+            "╠════════════════════════════════════════════════════════════════════════════════╣" +
+            Colors.RESET);
+
+    long totalWaitingTime = 0;
+
+    for (Process process : completedProcesses) {
+        String waitTimeStr = process.getTotalWaitingTime() + "ms";
+
+        System.out.println(Colors.BOLD + Colors.BRIGHT_CYAN + "║" + Colors.RESET +
+                "  " + Colors.BRIGHT_CYAN +
+                String.format("%-12s", process.getName()) + Colors.RESET +
+                Colors.YELLOW +
+                String.format("%-15s", process.getBurstTime() + "ms") + Colors.RESET +
+                Colors.MAGENTA +
+                String.format("%-15s", process.getPriority()) + Colors.RESET +
+                Colors.BRIGHT_GREEN +
+                String.format("%-20s", waitTimeStr) + Colors.RESET +
+                "      " +
+                Colors.BOLD + Colors.BRIGHT_CYAN + "║" + Colors.RESET);
+
+        totalWaitingTime += process.getTotalWaitingTime();
+    }
+
+    System.out.println(Colors.BOLD + Colors.BRIGHT_CYAN +
+            "╠════════════════════════════════════════════════════════════════════════════════╣" +
+            Colors.RESET);
+
+    double avgWaitingTime = (double) totalWaitingTime / completedProcesses.size();
+
+    System.out.println(Colors.BOLD + Colors.BRIGHT_CYAN + "║" + Colors.RESET +
+            "  " + Colors.BOLD + Colors.BRIGHT_YELLOW +
+            String.format("%-42s", "Average Waiting Time:") +
+            String.format("%-20s", String.format("%.2fms", avgWaitingTime)) +
+            Colors.RESET + "      " +
+            Colors.BOLD + Colors.BRIGHT_CYAN + "║" + Colors.RESET);
+
+    System.out.println(Colors.BOLD + Colors.BRIGHT_CYAN +
+            "╚════════════════════════════════════════════════════════════════════════════════╝" +
+            Colors.RESET + "\n");
+}
 }
