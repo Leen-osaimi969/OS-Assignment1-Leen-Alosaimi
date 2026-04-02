@@ -157,6 +157,10 @@ class Process implements Runnable {
 }
 
 public class SchedulerSimulation {
+    // feature 2 :static counter for context switches
+    private static int contextSwitches = 0;
+
+
     public static void main(String[] args) {
         // ⚠️ IMPORTANT: Put your student ID here to seed the random number generator
         // This makes your output unique to you - DO NOT forget to change this!
@@ -237,6 +241,9 @@ public class SchedulerSimulation {
         while (!processQueue.isEmpty()) {
             // Get the next thread from the queue (FIFO)
             Thread currentThread = processQueue.poll(); // Dequeues the next thread
+
+            //feature 2 : increment context switch counter when a new process starts running 
+            contextSwitches++;
             
             // Print the current process queue (list of process IDs in the queue)
             System.out.println(Colors.BOLD + Colors.MAGENTA + "┌─ Ready Queue " + "─".repeat(65) + Colors.RESET);
@@ -294,8 +301,31 @@ public class SchedulerSimulation {
         System.out.println(Colors.BOLD + Colors.BRIGHT_GREEN + 
                           "╚════════════════════════════════════════════════════════════════════════════════╝" + 
                           Colors.RESET + "\n");
-    }
+        // feature 2 : display total context switch at the end of simulation
+       System.out.println(Colors.BOLD + Colors.BRIGHT_YELLOW +
+        "╔══════════════════════════════════════════════════════════════╗" +
+        Colors.RESET);
+
+System.out.println(Colors.BOLD + Colors.BRIGHT_WHITE +
+        Colors.BG_BLUE + Colors.BOLD + "            SCHEDULER STATISTICS            " +
+        Colors.RESET);
+
+System.out.println(Colors.BOLD + Colors.BRIGHT_YELLOW +
+        "╠══════════════════════════════════════════════════════════════╣" +
+        Colors.RESET);
+
+System.out.println(Colors.BOLD + Colors.BRIGHT_YELLOW +
+        Colors.CYAN + "  🔄 Total context switches: " + Colors.RESET +
+        Colors.BRIGHT_CYAN + String.format("%-52s", contextSwitches) +
+        Colors.RESET);
+
+System.out.println(Colors.BOLD + Colors.BRIGHT_YELLOW +
+        "╚══════════════════════════════════════════════════════════════╝" +
+        Colors.RESET + "\n");
     
+
+    }
+
     // Method to add a process to the queue and map, while printing a "ready" message
     // feature 1 : updated to include priority in the message
     public static void addProcessToQueue(Process process, Queue<Thread> processQueue, 
