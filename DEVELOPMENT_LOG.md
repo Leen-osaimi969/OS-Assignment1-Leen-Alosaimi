@@ -46,18 +46,13 @@ Document your development process as you work on the assignment. Add entries sho
 **Solutions implemented:** I carefully modified the constructor parameters and updated all places where Process objects are created. I also tested the output to confirm that the priority appears correctly.  
 **Time spent:** About 50 minutes
 
-### Entry 3 - [Date and Time]
-**What I did**: 
+## Entry 3
+**Date/Time:** March 18, 2026 - 8:15 PM  
+**What I worked on:** I worked on Feature 2 by adding a context switch counter in the scheduler. I incremented it every time a new process starts execution.  
+**Challenges encountered:** I was not sure where to place the counter so that it reflects actual context switches.  
+**Solutions implemented:** I placed the counter increment right after selecting the next process from the queue and verified the output at the end of the simulation.  
+**Time spent:** About 40 minutes
 
-**Details**: 
-
-**Challenges**: 
-
-**Solution**: 
-
-**Time spent**: 
-
----
 
 ### Entry 4 - [Date and Time]
 **What I did**: 
