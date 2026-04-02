@@ -39,18 +39,12 @@ Document your development process as you work on the assignment. Add entries sho
 **Solutions implemented:** I followed the instructions carefully and made sure to open the correct folder in VS Code. I also verified that the repository was linked to my GitHub account.  
 **Time spent:** About 45 minutes
 
-### Entry 2 - [Date and Time]
-**What I did**: 
-
-**Details**: 
-
-**Challenges**: 
-
-**Solution**: 
-
-**Time spent**: 
-
----
+## Entry 2
+**Date/Time:** March 10, 2026 - 7:30 PM  
+**What I worked on:** I implemented Feature 1 by adding a priority field to the Process class. I also updated the constructor and added a getter method.  
+**Challenges encountered:** I had difficulty updating the constructor and making sure the priority value is passed correctly when creating processes.  
+**Solutions implemented:** I carefully modified the constructor parameters and updated all places where Process objects are created. I also tested the output to confirm that the priority appears correctly.  
+**Time spent:** About 50 minutes
 
 ### Entry 3 - [Date and Time]
 **What I did**: 
