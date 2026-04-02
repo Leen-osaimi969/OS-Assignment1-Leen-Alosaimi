@@ -54,18 +54,14 @@ Document your development process as you work on the assignment. Add entries sho
 **Time spent:** About 40 minutes
 
 
-### Entry 4 - [Date and Time]
-**What I did**: 
+## Entry 4
+**Date/Time:** March 25, 2026 - 9:00 PM  
+**What I worked on:** I implemented Feature 3 by adding waiting time tracking variables such as creationTime, lastReadyTime, and totalWaitingTime. I also created methods to update waiting time.  
+**Challenges encountered:** The main challenge was understanding when a process starts waiting and how to calculate the waiting time correctly.  
+**Solutions implemented:** I used System.currentTimeMillis() to track the timing and updated the waiting time before each process starts running.  
+**Time spent:** About 1 hour
 
-**Details**: 
 
-**Challenges**: 
-
-**Solution**: 
-
-**Time spent**: 
-
----
 
 ### Entry 5 - [Date and Time]
 **What I did**: 
