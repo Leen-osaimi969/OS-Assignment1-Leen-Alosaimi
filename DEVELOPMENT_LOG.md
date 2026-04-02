@@ -63,38 +63,10 @@ Document your development process as you work on the assignment. Add entries sho
 
 
 
-### Entry 5 - [Date and Time]
-**What I did**: 
+## Entry 5
+**Date/Time:** April 2, 2026 - 3:30 AM  
+**What I worked on:** I finalized the assignment by testing all features, fixing errors, and adding the waiting time summary table. I also reviewed the full code to ensure everything works correctly.  
+**Challenges encountered:** I faced several errors such as incorrect variable names and misplaced brackets while completing the final feature.  
+**Solutions implemented:** I carefully reviewed the code, corrected the errors step by step, and tested the program until it ran successfully without issues.  
+**Time spent:** About 1 hour and 15 minutes
 
-**Details**: 
-
-**Challenges**: 
-
-**Solution**: 
-
-**Time spent**: 
-
----
-
-### Entry 6 - [Optional - Date and Time]
-**What I did**: 
-
-**Details**: 
-
-**Challenges**: 
-
-**Solution**: 
-
-**Time spent**: 
-
----
-
-## Summary
-
-**Total time spent on assignment**: [X hours]
-
-**Most challenging part**: 
-
-**Most interesting learning**: 
-
-**What I would do differently next time**: 
